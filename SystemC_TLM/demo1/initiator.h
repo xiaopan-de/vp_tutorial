@@ -1,14 +1,15 @@
 /* *****************************************************************************
- * @file    initiator.h
+ * @file    /vp_tutorial/tlm_demo/tlm_demo1/initiator.h
  * @author  Xiao Pan <pan@cs.uni-kl.de>
  * @date    09.07.2018
  *
- * @brief   This file is part of TLM toturials in the master course "Virtual
- *          Prototyping" offered by Prof.Dr. Christoph Grimm (TU Kaiserslautern,
- *          Germany). More information please go to:
- *          https://cps.cs.uni-kl.de/lehre/virtual-prototyping/
+ * @brief   Initiator module
  *
+ * This file is part of TLM tutorials in the master course "Virtual Prototyping"
+ * given by Prof.Dr. Christoph Grimm (TU Kaiserslautern).
+ * See: https://cps.cs.uni-kl.de/lehre/virtual-prototyping/
  * ****************************************************************************/
+
 
 
 #ifndef _tlm_demo1_initiator_h_
@@ -18,8 +19,7 @@
 #include "tlm.h"
 #include "tlm_utils/simple_initiator_socket.h"
 
-using namespace sc_core;
-using namespace sc_dt;
+
 using namespace std;
 
 //------------------------------------------------------------------------------
@@ -56,26 +56,24 @@ SC_MODULE(initiator)
             // random generates tlm command of Write or Read
             cmd  = static_cast<tlm::tlm_command>(rand() % 2);
             
-            // random generates access address form 0xAA000000 to 0xAA0000FF
-            addr =  0xAA000000 | (rand() % 0xFF);
+            // random generates access address form 0x08000000 to 0x080000FF
+            addr =  0x08000000 | (rand() % 0xFF);
             
             // random generates write data up to 0xFF
-            if (cmd == tlm::TLM_WRITE_COMMAND)  data = (rand() % 0xFF);
+            if (cmd == tlm::TLM_WRITE_COMMAND) { data = (rand() % 0xFF); }
             
-            // print log information
-            cout << endl;
-            cout << "#Test_" << dec << i <<endl;
-            cout << setw(10) << setfill(' ') << sc_time_stamp();
-            cout << " (Initiator)  ";
+            // loging information
+            cout << endl << "#Test_" << dec << i <<endl;
+            cout << "(Initiator) @ " << sc_core::sc_time_stamp();
             if(cmd == tlm::TLM_WRITE_COMMAND)
             {
-                cout <<"Writing 0x" << setw(2) << setfill('0');
-                cout << hex << (uint32_t)data << " to address  0x";
+                cout <<", Writing 0x" << setw(2) << setfill('0');
+                cout << hex << uppercase << data << " to address  0x";
             }else{
-                cout <<"Reading from address 0x";
+                cout <<", Reading from address 0x";
             }
-            cout << setw(8)<< setfill('0') << hex << addr << endl ;
-           
+            cout << setw(8) << setfill('0') << hex << uppercase << addr << endl;
+            // end of loging information
             
             // Initialize 8 out of the 10 payload attributes
             // byte_enable_length and extensions being unused
@@ -90,14 +88,12 @@ SC_MODULE(initiator)
         
             // Call the transport. Since this is a synchronous model, the target
             // should have synchronized, and no additional delay on return.
-            sc_time delay = SC_ZERO_TIME;
+            sc_core::sc_time delay = sc_core::SC_ZERO_TIME;
             socket->b_transport(payload, delay);
         
-            
             // print log response information
-            cout << setw(10) << setfill(' ') << sc_time_stamp();
-            cout << " (Initiator) " <<  payload.get_response_string() <<endl ;
-            
+            cout << "(Initiator) @ " << sc_core::sc_time_stamp();
+            cout << ", " << payload.get_response_string() <<endl ;
         }
     }
 };

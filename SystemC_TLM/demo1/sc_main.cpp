@@ -28,7 +28,7 @@ int sc_main(int argc, char* argv[])
     i_initiator->socket.bind( i_target->socket );
 
     // Run forever
-    sc_start();
+    sc_core::sc_start();
     
     return 0;
 }
