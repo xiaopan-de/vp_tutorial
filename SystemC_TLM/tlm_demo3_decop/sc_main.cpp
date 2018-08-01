@@ -12,10 +12,10 @@
 
 
 #include <time.h>
-#include "../demo2/memory.h"
+#include "../tlm_demo2/memory.h"
 #include "processor0.h"
 #include "processor1.h"
-#include "../demo3_sync/bus.h"
+#include "../tlm_demo3_sync/bus.h"
 
 using namespace std;
 

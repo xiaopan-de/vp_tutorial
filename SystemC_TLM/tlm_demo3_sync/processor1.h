@@ -13,7 +13,7 @@
 #ifndef _tlm_demo3_sync_processor1_h_
 #define _tlm_demo3_sync_processor1_h_
 
-#include "../demo2/processor.h"
+#include "../tlm_demo2/processor.h"
 
 //------------------------------------------------------------------------------
 // Extended SystemC TLM processor0 from base class processor in TLM demo2

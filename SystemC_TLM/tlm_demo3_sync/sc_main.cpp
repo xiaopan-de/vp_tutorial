@@ -12,7 +12,7 @@
 
 
 #include <time.h>
-#include "../demo2/memory.h"
+#include "../tlm_demo2/memory.h"
 #include "processor0.h"
 #include "processor1.h"
 #include "bus.h"
@@ -48,13 +48,12 @@ int sc_main(int argc, char* argv[])
     cout << "\n\n\n";
     cout << "#############################################" << endl;
     cout << "#                                           #" << endl;
-    cout << "# TLM_demo 3(sync) : Simulation Complete.   #" << endl;
+    cout << "# TLM_demo 3(decop) : Simulation Complete.  #" << endl;
     cout << "#                                           #" << endl;
     cout << "# Simulated time   : " << setw(10) << setfill(' ') << t_sim     <<" ns          #"<<endl;
     cout << "# Elapsed CPU time : " << setw(10) << setfill(' ') << t_cpu*1e9 <<" ns          #"<< endl;
     cout << "#                                           #" << endl;
     cout << "#############################################" << endl;
-
     return 0;
 }
 

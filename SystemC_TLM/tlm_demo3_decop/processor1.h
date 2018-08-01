@@ -13,7 +13,7 @@
 #ifndef _tlm_demo3_decop_processor1_h_
 #define _tlm_demo3_decop_processor1_h_
 
-#include "../demo2/processor.h"
+#include "../tlm_demo2/processor.h"
 #include "tlm_utils/tlm_quantumkeeper.h"
 
 
