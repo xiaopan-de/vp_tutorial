@@ -29,5 +29,5 @@ include_directories(${SYSTEMC_INCLUDE_DIRS}
 
 add_subdirectory(SystemC_TLM/demo1)
 add_subdirectory(SystemC_TLM/demo2)
-#add_subdirectory(SystemC_TLM/demo3_td)
-#add_subdirectory(SystemC_TLM/demo3_sync)
+add_subdirectory(SystemC_TLM/demo3_sync)
+add_subdirectory(SystemC_TLM/demo3_decop)
