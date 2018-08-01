@@ -10,12 +10,10 @@
  * See: https://cps.cs.uni-kl.de/lehre/virtual-prototyping/
  * ****************************************************************************/
 
-using namespace std;
-
-
-
 #include "memory.h"
 
+using namespace sc_core;
+using namespace std;
 
 //------------------------------------------------------------------------------
 //! Class Constructor of the memory module
@@ -25,7 +23,7 @@ using namespace std;
 //! The memory array is first initialized with random numbers. A test struct
 //! data is then loaded  to the memory array from the starting address 0x00.
 //------------------------------------------------------------------------------
-memory::memory(sc_core::sc_module_name  name) :
+memory::memory(sc_module_name  name) :
 sc_module (name), data_bus("data_bus")
 {
     //! Register callback for incoming bus_readwrite interface method call.
@@ -62,7 +60,7 @@ sc_module (name), data_bus("data_bus")
 //! @param delay    How far the initiator is beyond baseline SystemC time.
 //------------------------------------------------------------------------------
 void memory::bus_readwrite( tlm::tlm_generic_payload& payload,
-                           sc_core::sc_time& delay )
+                           sc_time& delay )
 {
     
     tlm::tlm_command cmd         = payload.get_command();
@@ -73,7 +71,7 @@ void memory::bus_readwrite( tlm::tlm_generic_payload& payload,
     unsigned int     width       = payload.get_streaming_width();
     
     // logging
-    cout << "(Memory)    @ " << sc_core::sc_time_stamp() << ", Logging "  << endl;
+    cout << "(Memory)    @ " << sc_time_stamp() << ", Logging "  << endl;
     cout << "    Command : " << (cmd ? "WRITE" : "READ") <<endl;
     cout << "    Address : 0x" << setw(8) << setfill('0') << hex << uppercase;
     cout << addr << endl;
@@ -134,21 +132,19 @@ void memory::bus_readwrite( tlm::tlm_generic_payload& payload,
             break;
     }
     
-    // delay as appropriate
+    // add delay as appropriate
     switch( cmd )
     {
         case tlm::TLM_READ_COMMAND:
             // Represent the delay to access one byte data for read
-            wait( sc_core::sc_time( 5, sc_core::SC_NS ));
-            delay = sc_core::SC_ZERO_TIME;
+            delay += sc_time( 5, SC_NS );
             break;
         case tlm::TLM_WRITE_COMMAND:
             // Represent the delay to access one byte data for write
-            wait( sc_core::sc_time( 5, sc_core::SC_NS ));
-            delay = sc_core::SC_ZERO_TIME;
+            delay += sc_time( 5, SC_NS );
             break;
         case tlm::TLM_IGNORE_COMMAND:
-            delay = sc_core::SC_ZERO_TIME;
+            delay = SC_ZERO_TIME;
             break;
     }
     
@@ -163,7 +159,7 @@ void memory::bus_readwrite( tlm::tlm_generic_payload& payload,
 // -----------------------------------------------------------------------------
 void memory::print_memory(int n)
 {
-    cout << "(Memory) @ " << sc_core::sc_time_stamp() << endl;
+    cout << "(Memory) @ " << sc_time_stamp() <<", updated" << endl;
 
     int n_byte = n * 4;
     if(n_byte > MEM_SIZE) n_byte = MEM_SIZE;

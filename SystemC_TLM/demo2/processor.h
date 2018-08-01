@@ -22,7 +22,7 @@
 //------------------------------------------------------------------------------
 // SystemC TLM processor module definition.
 //------------------------------------------------------------------------------
-class processor: sc_core::sc_module
+class processor : public sc_core::sc_module
 {
 public:
 
@@ -37,17 +37,17 @@ protected:
     //! SystemC Thread which will execute the TLM access tests of the example.
     virtual void program_main();
     
-private:
+    //! The blocking transport routine for the socket.
+    virtual int bus_readwrite(tlm::tlm_command     cmd,
+                      uint64_t             addr,
+                      int                  data_len,
+                      uint8_t*             data_ptr,
+                      uint8_t*             byte_en_ptr);
+    
     //! The generic payload.
     tlm::tlm_generic_payload  trans;
     
-    //! The blocking transport routine for the socket.
-    int bus_readwrite(tlm::tlm_command     cmd,
-                       uint64_t             addr,
-                       int                  data_len,
-                       uint8_t*             data_ptr,
-                       uint8_t*             byte_en_ptr,
-                       sc_core::sc_time     delay);
+    
 };
 
 #endif

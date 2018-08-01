@@ -14,6 +14,7 @@
 #include "memory.h"
 #include "processor.h"
 
+using namespace std;
 
 // -----------------------------------------------------------------------------
 //! main program to execute TLM_demo2
@@ -30,6 +31,14 @@ int sc_main(int argc, char* argv[])
     // run forever
     sc_core::sc_start();
     
+    
+    // print simulation performance
+    cout << "\n\n\n";
+    cout << "#######################################" << endl;
+    cout << "#                                     #" << endl;
+    cout << "# TLM_demo 2 : Simulation Complete.   #" << endl;
+    cout << "#                                     #" << endl;
+    cout << "#######################################" << endl;
     
     return 0;
 }

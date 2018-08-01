@@ -16,14 +16,14 @@
 SC_HAS_PROCESS( processor );
 
 using namespace std;
-
+using namespace sc_core;
 
 //------------------------------------------------------------------------------
 //! Class Constructor of the processor module
 //
 //! @param name        SystemC module name
 //------------------------------------------------------------------------------
-processor::processor(sc_core::sc_module_name  name):
+processor::processor(sc_module_name  name):
 sc_module (name),
 data_bus("data_bus")
 {
@@ -41,7 +41,6 @@ data_bus("data_bus")
 //! @param  data_len      The number of bytes to read
 //! @param  data_ptr      Vector for the access data
 //! @param  byte_en_ptr   The byte enable mask for the access
-//! @param  delay         The transaction delay
 //
 //! @return  Zero on success. A return code otherwise.
 // ----------------------------------------------------------------------------
@@ -49,8 +48,7 @@ int processor::bus_readwrite(tlm::tlm_command  cmd,
                               uint64_t          addr,
                               int               data_len,
                               uint8_t*          data_ptr,
-                              uint8_t*          byte_en_ptr,
-                              sc_core::sc_time  delay)
+                              uint8_t*          byte_en_ptr)
 {
     // Initialize 8 out of the 10 attributes,
     // byte_enable_length and extensions being unused
@@ -63,8 +61,14 @@ int processor::bus_readwrite(tlm::tlm_command  cmd,
     trans.set_dmi_allowed(false);
     trans.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
     
+    //  time delay
+    sc_time delay    = SC_ZERO_TIME;
+    
     // Blocking transport call
     data_bus->b_transport(trans, delay);
+    
+    // wait transmission delay
+    wait(delay);
     
     // For now just simple non-zero return code on error 
     return  trans.is_response_ok () ? 0 : -1;
@@ -72,7 +76,7 @@ int processor::bus_readwrite(tlm::tlm_command  cmd,
 
 
 
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //! The SystemC thread running the TLM access tests of the example.
 //
 // Demonstrates access byte, half-word, full-word of a 32-bit memory using
@@ -83,16 +87,16 @@ int processor::bus_readwrite(tlm::tlm_command  cmd,
 // test 4 : write byte data.
 // test 5 : write half-word data.
 // test 6 : write full-word data.
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 void processor::program_main()
 {
     // Instruction execution timing
-    sc_core::sc_time   ins_delay = sc_core::sc_time(10, sc_core::SC_NS);
+    sc_time   ins_delay = sc_time(10, SC_NS);
     
-    uint32_t byte_en = 0xFFFFFFFF;     // for byte enable ptr
-    uint32_t data    = 0x00000000;     // for data ptr
+    uint32_t byte_en = 0xFFFFFFFF;     // byte enable ptr
+    uint32_t data    = 0x00000000;     // data ptr
 
-    cout << endl;
+    cout << endl << endl;
     cout << "#######################################################" << endl;
     cout << "# Test_1: Read byte data from address 0x08000000.     #" << endl;
     cout << "#######################################################" << endl;
@@ -103,20 +107,19 @@ void processor::program_main()
     // bus communication
     if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0x08000000, 4, // cmd,addr,data_len
                   reinterpret_cast<uint8_t *>(&data),       // data_ptr[]
-                  reinterpret_cast<uint8_t *>(&byte_en),    // byte_en_ptr[]
-                  sc_core::SC_ZERO_TIME)                    // delay
+                  reinterpret_cast<uint8_t *>(&byte_en))    // byte_en_ptr[]
        ){
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Read succeeded. " << endl;
         cout << "    Readout data : 0x" << setw(2) << setfill('0');
         cout << hex << uppercase << data << endl;
         cout << endl;
     }else{
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Read failed. " << endl;
     }
     
-    cout << endl;
+    cout << endl << endl;
     cout << "#######################################################" << endl;
     cout << "# Test_2: Read half-word data from address 0x08000000.#" << endl;
     cout << "#######################################################" << endl;
@@ -127,20 +130,19 @@ void processor::program_main()
     // bus communication
     if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0x08000000, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
-                      reinterpret_cast<uint8_t *>(&byte_en), // byte_en_ptr[]
-                      sc_core::SC_ZERO_TIME)                 // delay
+                      reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Read succeeded. " << endl;
         cout << "    Readout data : 0x" << setw(4) << setfill('0');
         cout << hex << uppercase << (data >> 16) << endl; //
         cout << endl;
     }else{
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Read failed. " << endl;
     }
     
-    cout << endl;
+    cout << endl << endl;
     cout << "#######################################################" << endl;
     cout << "# Test_3: Read full-word data from address 0x08000004.#" << endl;
     cout << "#######################################################" << endl;
@@ -151,21 +153,20 @@ void processor::program_main()
     // bus communication
     if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0x08000004, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
-                      reinterpret_cast<uint8_t *>(&byte_en), // byte_en_ptr[]
-                      sc_core::SC_ZERO_TIME)                 // delay
+                      reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Read succeeded. " << endl;
         cout << "    Readout data : 0x" << setw(8) << setfill('0');
         cout << hex << uppercase << data << endl; //
         cout << endl;
     }else{
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Read failed. " << endl;
     }
     
     
-    cout << endl;
+    cout << endl << endl;
     cout << "#######################################################" << endl;
     cout << "# Test_4: Write byte data to address 0x08000008.      #" << endl;
     cout << "#######################################################" << endl;
@@ -178,17 +179,16 @@ void processor::program_main()
     // bus communication
     if(!bus_readwrite(tlm::TLM_WRITE_COMMAND, 0x08000008, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
-                      reinterpret_cast<uint8_t *>(&byte_en), // byte_en_ptr[]
-                      sc_core::SC_ZERO_TIME)                 // delay
+                      reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Write succeeded. " << endl;
     }else{
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Write failed. " << endl;
     }
     
-    cout << endl;
+    cout << endl << endl;
     cout << "#######################################################" << endl;
     cout << "# Test_5: Write half-word data to address 0x08000000. #" << endl;
     cout << "#######################################################" << endl;
@@ -201,16 +201,16 @@ void processor::program_main()
     // bus communication
     if(!bus_readwrite(tlm::TLM_WRITE_COMMAND, 0x08000000, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
-                      reinterpret_cast<uint8_t *>(&byte_en), // byte_en_ptr[]
-                      sc_core::SC_ZERO_TIME)                 // delay
+                      reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Write succeeded. " << endl;
     }else{
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Write failed. " << endl;
     }
     
+    cout << endl << endl;
     cout << "#######################################################" << endl;
     cout << "# Test_6: Write half-word data to address 0x08000004. #" << endl;
     cout << "#######################################################" << endl;
@@ -224,13 +224,12 @@ void processor::program_main()
     // bus communication
     if(!bus_readwrite(tlm::TLM_WRITE_COMMAND, 0x08000004, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
-                      reinterpret_cast<uint8_t *>(&byte_en), // byte_en_ptr[]
-                      sc_core::SC_ZERO_TIME)                 // delay
+                      reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Write succeeded. " << endl;
     }else{
-        cout << "(Processor) @ " << sc_core::sc_time_stamp();
+        cout << "(Processor) @ " << sc_time_stamp();
         cout << ", Write failed. " << endl;
     }
     
