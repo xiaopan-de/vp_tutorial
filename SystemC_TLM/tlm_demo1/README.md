@@ -20,7 +20,7 @@ The source code of the *initiator* module can be found in the folder `vp_tourial
 
 
 ### 1.1 Include Files
-The *initiator* module is based on the TLM 2.0 convenience simple initiator socket.  It needs the appropriate header, in addition to the standard TLM 2.0 header from the utilities directory. Including `<iostream>` in the header to use functions such as `setw()` to format print. 
+The *initiator* module is based on the TLM 2.0 convenience simple initiator socket.  So it needs the appropriate header, in addition to the standard TLM 2.0 header from the utilities directory. Including `<iostream>` in the header to use functions such as `setw()` to format print. 
 
 ```C
 #include <iomanip>
@@ -32,43 +32,48 @@ The *initiator* module is based on the TLM 2.0 convenience simple initiator sock
 
 ### 1.2 Module Declaration, Interfaces and  Constructor
 Simply use SystemC marco `SC_MODULE()` to define module. 
+
 ```C
 SC_MODULE(initiator){ /* ... */ }
 ```
 
 The public interface is the TLM 2.0 simple initiator convenience socket, namely *socket*.
+
 ```C
 //! TLM-2.0 socket, defaults to 32-bits wide, base protocol
 tlm_utils::simple_initiator_socket<initiator> socket;
 ```
 
 The initiator module is responsible for creating a payload for the transportation. 
+
 ```C
 //! TLM-2.0 generic payload
 tlm::tlm_generic_payload  payload;
 ```
 
-Use the SystemC macro `SC_CTOR()` to define the constructor for the module. The colon followed the constructor calls the constructor of the interface  `simple_initiator_socket` and initializes it with name *socket*.   The member function, `program_main()` is associated with the class as a SystemC thread, using the SC_THREAD macro. 
+Simply use  SystemC macro `SC_CTOR()` to define the constructor. The colon followed the constructor calls the constructor of the interface  `simple_initiator_socket` and initializes it with name `socket`.   The member function, `thread_main()` is associated with the class as a SystemC thread, using the `SC_THREAD  macro. 
 
 ```C
 //! Constructor
 SC_CTOR(initiator) : socket("socket")
 {
-  SC_THREAD(program_main);
+  SC_THREAD(thread_main);
 }
 ```
 
 ### 1.3 Process Thread 
-The *initiators* module has a single SystemC thread `program_main()` that initiates random read/write from/to the *target* module. It will be called automatically by the SystemC kernel after elaboration (i.e SystemC initialization). From a hardware point of view, the thread  executed the main tasks in the initiator module. It can be considered as the main program in the processor unit, such as a CPU. Therefore, we use the name of `program_main()`. 
+The *initiators* module has a single SystemC thread `thread_main()` that initiates random read-from / write-to the *target* module. It is called automatically by the SystemC kernel after elaboration (i.e SystemC initialization). From a hardware point of view, the thread  executed the main tasks in the initiator module. 
+
+
 
 ```C
-void program_main()
+void thread_main()
 { /* ... */
 ```
 
 [comment]: <> (Each generic payload transaction has a standard set of bus attributes: command, address, data, byte enables, streaming width, and response status. )
 
-In the first example, we will demonstrate a basic memory-mapped bus communication. For this purpose, three variables are needed to pass the attribute in the transaction. A `tlm::tlm_command` type variable `cmd`  indicates the transaction is a READ or WRITE.  The command is set randomly. Variable `addr` holds the memory mapped address for the access. It is defined as a fixed width unsigned integer type up to 64 bits `uint64_t`. The data to write or hold readout is defined as `uint8_t` that we only demonstrate accessing one-byte data per transaction. The second demo will show how to access multiple bytes data with the help of byte enables attribute. Attributes of the generic payload are set using `set_` interfaces. 
+Three attribute in the transaction are used for the basic transaction. The `tlm::tlm_command` indicates the transaction is a type of READ or WRITE.  This command is set randomly. Variable `addr` holds the memory mapped address of the access. It is defined as a fixed width unsigned integer type up to 64 bits `uint64_t`. The data to write or hold readout is defined as type `uint8_t` for a one-byte data access.  Attributes of the generic payload are set using `set_` interfaces. 
 
 ```C
 tlm::tlm_command cmd   = tlm::TLM_READ_COMMAND; // command
@@ -103,7 +108,7 @@ sc_time delay = SC_ZERO_TIME;
 socket->b_transport(payload, delay);
 ```
 
-The *initiator* simply repeats the above access to the *targert* without any time detail.  At no time does the thread call SystemC `wait()`, so it will not yield execution to the other threads. It won't cause any functional error here because there is only one thread in the overall simulation. In the next demo we will add time information in the modeling.  
+The *initiator* simply repeats the above access to the *targert* without any time detail.  At no time does the thread call SystemC `wait()`, so it will not yield execution to the other threads. In the next demo we will add time information in the modeling.  
 
 
 --- 
@@ -114,7 +119,7 @@ The source code of the *target* module can be found in the folder `vp_tourial\tl
 ### 2.1 Include Files
 The *target* module is based on the TLM 2.0 convenience simple target socket, so needs the appropriate header from the utilities directory, in addition to the standard TLM 2.0 header. 
 
-When using the OSCI simulator, it is necessary to define the macro SC_INCLUDE_DYNAMIC_PROCESSES when using certain parts of the TLM-2.0 kit, in particular, the simple sockets, the reason being that these particular sockets spawn dynamic processes.  [doulos.com](https://www.doulos.com/knowhow/systemc/tlm2/tutorial1/)
+> When using the OSCI simulator, it is necessary to define the macro SC_INCLUDE_DYNAMIC_PROCESSES when using certain parts of the TLM-2.0 kit, in particular, the simple sockets, the reason being that these particular sockets spawn dynamic processes.  [doulos.com](https://www.doulos.com/knowhow/systemc/tlm2/tutorial1/)
 
 In this set of demos, the macro `SC_INCLUDE_DYNAMIC_PROCESSES` has been defined in the Cmakefile. Nevertheless, a redefinition won't cause any error.
 
@@ -184,7 +189,7 @@ payload.set_response_status( tlm::TLM_OK_RESPONSE );
 --- 
 
 ## 3. Top level and sc_main Function 
-The  `sc_main` function is the main program that invokes the simulation. The top-level hierarchy is implemented in the `sc_main` function that the instantiates of initiator and target are connected(bind).   The source code file for the main program can be found in `vp_tourial\tlm_demo\tlm_demo1\sc_main.h` 
+The main function `sc_main` function invokes the simulation. The top-level hierarchy is implemented in the `sc_main` function that instantiates of initiator and target module are connected.   The source code file for the main program can be found in `vp_tourial\tlm_demo\tlm_demo1\sc_main.h` 
 
 ```C
 int sc_main(int argc, char* argv[])
@@ -192,7 +197,9 @@ int sc_main(int argc, char* argv[])
   initiator   *i_initiator   = new initiator("i_initiator");
   target      *i_target      = new target("i_target");
   i_initiator->socket.bind( i_target->socket ); // Bind  ports
+  
   sc_start();  // Run forever
+  
   return 0;
 }
 ```
@@ -202,7 +209,7 @@ int sc_main(int argc, char* argv[])
 
 
 ##  4. Simulation and Outputs
-Compile and execute TLM_demo1 will give the following outputs:
+Compile and execute TLM_demo1 will print the following outputs:
 ```
 ./tlm_demo1
 
@@ -210,30 +217,35 @@ Compile and execute TLM_demo1 will give the following outputs:
         Copyright (c) 1996-2012 by all Contributors,
         ALL RIGHTS RESERVED
 
-
 #Test_0
-       0 s (Initiator)  Writing 0x9e to address  0xaa000013
-       0 s (Target) Logging  
-                    Command : write
-                    Address : 0xaa000013
-                    Data    : 0x9e
-       0 s (Initiator) TLM_OK_RESPONSE
+      (Initiator) @ 0 s, Writing 0x0\236 to address  0x08000013
+      (Target)    @ 0 s, Logging 
+          Command : WRITE
+          Address : 0x08000013
+          Data    : 0x139E
+      (Initiator) @ 0 s, TLM_OK_RESPONSE
 
 #Test_1
-       0 s (Initiator)  Reading from address 0xaa0000af
-       0 s (Target) Logging  
-                    Command : read
-                    Address : 0xaa0000af
-       0 s (Initiator) TLM_OK_RESPONSE
+      (Initiator) @ 0 s, Reading from address 0x080000AF
+      (Target)    @ 0 s, Logging 
+          Command : READ
+          Address : 0x080000AF
+      (Initiator) @ 0 s, TLM_OK_RESPONSE
 
 #Test_2
-       0 s (Initiator)  Reading from address 0xaa000072
-       0 s (Target) Logging  
-                    Command : read
-                    Address : 0xaa000072
-       0 s (Initiator) TLM_OK_RESPONSE
-       
+      (Initiator) @ 0 s, Reading from address 0x08000072
+      (Target)    @ 0 s, Logging 
+          Command : READ
+          Address : 0x08000072
+      (Initiator) @ 0 s, TLM_OK_RESPONSE
+
 #Test_3
-      ...
+      (Initiator) @ 0 s, Reading from address 0x080000BC
+      (Target)    @ 0 s, Logging 
+          Command : READ
+          Address : 0x080000BC
+      (Initiator) @ 0 s, TLM_OK_RESPONSE
+
+...
 ```
-Each access from the _initiator_ generates the expected transactional access. All accesses are 32 bits wide. The _target_ always return  *TLM_OK_RESPONSE*. As a timeless model, all events happen with ZERO time notation. 
+Each access from the *initiator* generates the expected transactional access. All accesses are 32 bits wide. The *target* always return  *TLM_OK_RESPONSE*. As a timeless model, all events happen with ZERO time notation. 
