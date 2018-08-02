@@ -22,11 +22,11 @@ using namespace std;
 int sc_main(int argc, char* argv[])
 {
     //! Instantiate the modules
-    processor  *i_mcu  = new processor("i_processor");
-    memory     *i_mem  = new memory("i_memory");
+    processor  *i_processor  = new processor("i_processor");
+    memory     *i_mem        = new memory("i_memory");
     
     //! Bind  the TLM ports
-    i_mcu->data_bus.bind( i_mem->data_bus );
+    i_processor->data_bus.bind( i_mem->data_bus );
 
     // run forever
     sc_core::sc_start();

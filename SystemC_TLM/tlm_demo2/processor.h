@@ -46,8 +46,7 @@ protected:
     
     //! The generic payload.
     tlm::tlm_generic_payload  trans;
-    
-    
+
 };
 
 #endif

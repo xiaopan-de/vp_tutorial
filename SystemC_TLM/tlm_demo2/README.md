@@ -85,13 +85,11 @@ tlm_utils::simple_target_socket<memory> data_bus;
 Static declared `uint8_t` (`char`) array with default size of 256 is used to keep the contents of the _memory_. 
  
 ```C
-private:
-
-  //! Memory size 256 bytes.
-  static const int MEM_SIZE = 256 ;
+//! Memory size 256 bytes.
+static const int MEM_SIZE = 256 ;
   
-  //! Byte array models memory storages.
-  uint8_t mem[MEM_SIZE];
+//! Byte array models memory storages.
+uint8_t mem[MEM_SIZE];
 ```
 
 ####  3.1.5 Blocking Transport
@@ -115,7 +113,7 @@ The code for the _memory_ module implementation may be found in `vp_tourial\tlm_
 
 
 
-#### 3.2.1 Included Headers
+#### 3.2.1 Headers
 Module definition file `memory.h` in the same directory should be included. 
 
 ```C
@@ -152,9 +150,8 @@ memory::memory(sc_core::sc_module_name  name): sc_module (name), data_bus("data_
 }
 ```
 
-The _memory array_ is initialized with random numbers and a test struct is defined and copied to the memory array from starting address.  In the end, the debug print function `print_memory()` is called to virtualize the contents of the _memory_ which gives the following output:
+The _memory array_ is first initialized with random numbers and then a test struct is copied to the memory from the starting address.  The debug print function `print_memory()` is called to virtualize the contents of the _memory_ which gives the following output:
 ```
-(Memory) @ 0 s, updated
  +----+----+----+----+ 
  | 50 | 78 | 6D | BC | 0x00000008
  +----+----+----+----+ 
@@ -246,22 +243,133 @@ switch( cmd )
 --- 
 
 ## 4. Processor  Module 
-The code for the *processor*  module (processor.cpp and processor.h) may be found in the vp_tourial\tlm_demo\tlm_demo2\ directory of the distribution. 
+The source code of the *processor* module (processor.cpp and processor.h) may be found in the  `vp_tourial\tlm_demo\tlm_demo2\` directory of the distribution.  The definition and implementation are divided into head and .cpp file. 
 
 ### 4.1  Processor Module Class Definition
 
+
+
 #### 4.1.1   Included Headers 
+The same as the *initiator* module in [TLM_Demo1]().
+
+
 #### 4.1.2   Module Declaration and Constructor
+Module _processor_ is declared by public inheritance from sc_core::sc_module. 
+
+```C
+class processor : public sc_core::sc_module
+{
+public:
+
+    processor(sc_core::sc_module_name  name);
+```
+
+
 #### 4.1.3   Public Interface 
-#### 4.1.4   Blocking transport routine
-#### 4.1.5   Thread
+
+The public interface is the simple initiator convenience socket, default with 32-bits wide and base protocal used. 
+
+
+```C
+tlm_utils::simple_initiator_socket<processor> data_bus;
+```
+
+#### 4.1.4  Generic Payload 
+The initiator module is responsible for creating a payload for the transportation.
+
+```C
+tlm::tlm_generic_payload  trans;
+```
+
+#### 4.1.5  Process Thread
+The processor module has a singal thread whihc is similar to the the thread presented in [TLM_Demo1](). The thead executes the "main program" in the processor.  The thread is not part of the public interface, but will be redefined in derived classes in the next tutorials, so it is declared protected and virtual.
+
+```C
+virtual void process_main();
+```
+
+
+
+#### 4.1.6   Blocking transport routine 
+The attributes setting is enclosed in a member function that constructs a generic transaction for the read and write access.  This function is also protected and virtual, since it will be redefined again later in the next examples.
+
+```C
+virtual int bus_readwrite(tlm::tlm_command     cmd,
+                  uint64_t             addr,
+                  int                  data_len,
+                  uint8_t*             data_ptr,
+                  uint8_t*             byte_en_ptr);
+```
+
+
+
+
 
 
 
 ### 4.2  Processor Module Class Implementation
-#### 4.2.1   Included Headers 
+
+
+#### 4.2.1  Headers and Marcos 
+The definition file has to be included. 
+
+```C
+#include "processor.h"
+```
+
+`SC_HAS_PROCESS`  macro is required to set up SystemC class with threads (`SC_THREAD`), methods (`SC_METHOD`) or clocked threads (`SC_CTHREAD`). It didn't appear in TLM_Demo1 because the marco `SC_CTOR` was used to define the constructor which provides the same definition. 
+
+
+```C
+SC_HAS_PROCESS( processor );
+```
+
 #### 4.2.2   Constructor
+The constructor passes the name to the constructors of its base class (sc_module) and its simple initiator socket (data_bus). program_main is associated with the class as a SystemC thread, using the SC_THREAD macro. It will be called automatically by the SystemC kernel after elaboration
+
+```C
+processor::processor(sc_module_name  name) : sc_module (name), data_bus("data_bus")
+{
+    SC_THREAD (program_main);
+}
+```
+
+
 #### 4.2.4   Blocking transport routine
+The member function `bus_readwrite` handles the read/write request from the thread `program_main`. It consists 5 parameters that will be used in this usecase and the delivered classes in TLM_Demo3. They are: 
+- **cmd** of the generic payload that can be either read or write.
+-  **addr** specifies the memory mapped address to be read or write.
+- **data_len**  gives the length of the data array in bytes, in this case should be always 4. 
+- **data_ptr** is the pointer that points to a data buffer within the initiator.
+- **byte_en_ptr** is  the pointer that points to the byte enable mask. 
+
+```C
+int processor::bus_readwrite(tlm::tlm_command cmd, uint64_t  addr, int data_len, uint8_t* data_ptr, uint8_t* byte_en_ptr)
+{
+  trans.set_command(cmd);
+   trans.set_address(addr);
+   trans.set_data_ptr(data_ptr);
+   trans.set_data_length(data_len);
+   trans.set_streaming_width(data_len);//=data_length indicates no streaming
+   trans.set_byte_enable_ptr(byte_en_ptr);
+   trans.set_dmi_allowed(false);
+   trans.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
+```
+
+Once the payload fields are set up, `b_transport` is called to transport the payload to the target and return the result.  A time variable is passed to the blocking transport function of the socket with the payload. As presented in the previous section, the _Memory_ module adds appropriate delays to the time variale. As a synchronized implementation, the processor module executes a SystemC `wait ` call immediately. 
+ 
+```C
+   sc_time delay    = SC_ZERO_TIME;
+   data_bus->b_transport(trans, delay);
+   wait(delay);
+```
+
+
+A simple non-zero return code on error. 
+```C 
+   return  trans.is_response_ok () ? 0 : -1;
+```
+
 #### 4.2.5   Thread
 
 
@@ -272,16 +380,25 @@ The code for the *processor*  module (processor.cpp and processor.h) may be foun
 --- 
 
 ## 5. Top level and sc_main Function  
+The top-level hierarchy is implemented in the `sc_main`  function that instantiates of the _processor_  and _memory_ module are connected. The simulation will executes until the end of the SystemC _Thread_ `program_main` in the _processor_ module. 
+
+```C
+int sc_main(int argc, char* argv[])
+{
+  processor  *i_processor  = new processor("i_processor");
+  memory     *i_mem        = new memory("i_memory"); 
+  i_processor->data_bus.bind( i_mem->data_bus );
+
+  sc_core::sc_start(); 
+```
 
 
 --- 
 
 ## 6. Simulation and Outputs
 
-[comment]: <> (include more complex use-case : mcu as initiator and memory as target
-byte, half word, full-word access from bus communicaion
-memory handles the received data
-logging)
+The simulation outputs have been given in the previous sections (4.2.5) . 
+
 
 
  
