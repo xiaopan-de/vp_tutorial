@@ -38,7 +38,7 @@ void processor0::program_main()
 {
     uint32_t byte_en = 0x000000FF;    // byte enable ptr
     uint32_t wdata   = 0x00000000;    // data to write to the memory
-    uint32_t addr    = 0x08000000;    // address to write to the memory
+    uint32_t addr    = 0xFF000000;    // address to write to the memory
     sc_time delay    = SC_ZERO_TIME;  //  time delay
     
     while(true)
