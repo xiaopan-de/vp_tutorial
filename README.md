@@ -1,5 +1,5 @@
 # vp_tutorial
-This repository consists of a set of tutorial demos for lecture virtual prototyping covering SysML, SystemC (incl. TLM and AMS extensions), instructions set simulator (ISS).  
+This repository consists of a set of tutorial demos for lecture virtual prototyping covering SysML, SystemC (incl. TLM and AMS extensions), instructions set simulator (ISS).  Details can be found in the subfolders.  
 
 ## Usage
 0. This tool is available at github [vp_tutorial](https://github.com/panxiao-tech/vp_tutorial)
