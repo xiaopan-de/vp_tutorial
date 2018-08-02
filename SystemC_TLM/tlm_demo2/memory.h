@@ -36,14 +36,15 @@ public:
     //! TLM-2 socket, defaults to 32-bits wide, base protocol.
     tlm_utils::simple_target_socket<memory> data_bus;
     
-protected:
+private:
+    
     //! Memory size 256 bytes.
     static const int MEM_SIZE = 256 ;
     
     //! Byte array models memory storages.
     uint8_t mem[MEM_SIZE];
 
-private:
+
     //! Blocking transport routine the target socket.
     void bus_readwrite(tlm::tlm_generic_payload& payload,
                        sc_core::sc_time& delay);
