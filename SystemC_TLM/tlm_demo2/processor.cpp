@@ -98,14 +98,14 @@ void processor::program_main()
 
     cout << endl << endl;
     cout << "#######################################################" << endl;
-    cout << "# Test_1: Read byte data from address 0x08000000.     #" << endl;
+    cout << "# Test_1: Read one byte data from address 0xFF000000. #" << endl;
     cout << "#######################################################" << endl;
     // set byte enable (mask bytes)
     byte_en = 0x000000FF;
     // delay of the instruction processing time
     wait(ins_delay);
     // bus communication
-    if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0x08000000, 4, // cmd,addr,data_len
+    if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0xFF000000, 4, // cmd,addr,data_len
                   reinterpret_cast<uint8_t *>(&data),       // data_ptr[]
                   reinterpret_cast<uint8_t *>(&byte_en))    // byte_en_ptr[]
        ){
@@ -121,14 +121,14 @@ void processor::program_main()
     
     cout << endl << endl;
     cout << "#######################################################" << endl;
-    cout << "# Test_2: Read half-word data from address 0x08000000.#" << endl;
+    cout << "# Test_2: Read half-word data from address 0xFF000000.#" << endl;
     cout << "#######################################################" << endl;
     // set byte enable (mask bytes)
     byte_en = 0xFFFF0000;
     // delay of the instruction processing time
     wait(ins_delay);
     // bus communication
-    if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0x08000000, 4,  // cmd,addr,data_len
+    if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0xFF000000, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
                       reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){
@@ -144,14 +144,14 @@ void processor::program_main()
     
     cout << endl << endl;
     cout << "#######################################################" << endl;
-    cout << "# Test_3: Read full-word data from address 0x08000004.#" << endl;
+    cout << "# Test_3: Read full-word data from address 0xFF000004.#" << endl;
     cout << "#######################################################" << endl;
     // set byte enable (mask bytes)
     byte_en = 0xFFFFFFFF;
     // delay of the instruction processing time
     wait(ins_delay);
     // bus communication
-    if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0x08000004, 4,  // cmd,addr,data_len
+    if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0xFF000004, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
                       reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){
@@ -168,7 +168,7 @@ void processor::program_main()
     
     cout << endl << endl;
     cout << "#######################################################" << endl;
-    cout << "# Test_4: Write byte data to address 0x08000008.      #" << endl;
+    cout << "# Test_4: Write byte data to address 0xFF000008.      #" << endl;
     cout << "#######################################################" << endl;
     // set byte enable (mask bytes)
     byte_en = 0x000000FF;
@@ -177,7 +177,7 @@ void processor::program_main()
     // delay of the instruction processing time
     wait(ins_delay);
     // bus communication
-    if(!bus_readwrite(tlm::TLM_WRITE_COMMAND, 0x08000008, 4,  // cmd,addr,data_len
+    if(!bus_readwrite(tlm::TLM_WRITE_COMMAND, 0xFF000008, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
                       reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){
@@ -190,7 +190,7 @@ void processor::program_main()
     
     cout << endl << endl;
     cout << "#######################################################" << endl;
-    cout << "# Test_5: Write half-word data to address 0x08000000. #" << endl;
+    cout << "# Test_5: Write half-word data to address 0xFF000000. #" << endl;
     cout << "#######################################################" << endl;
     // set byte enable (mask bytes)
     byte_en = 0x0000FFFF;
@@ -199,7 +199,7 @@ void processor::program_main()
     // delay of the instruction processing time
     wait(ins_delay);
     // bus communication
-    if(!bus_readwrite(tlm::TLM_WRITE_COMMAND, 0x08000000, 4,  // cmd,addr,data_len
+    if(!bus_readwrite(tlm::TLM_WRITE_COMMAND, 0xFF000000, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
                       reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){
@@ -212,7 +212,7 @@ void processor::program_main()
     
     cout << endl << endl;
     cout << "#######################################################" << endl;
-    cout << "# Test_6: Write half-word data to address 0x08000004. #" << endl;
+    cout << "# Test_6: Write half-word data to address 0xFF000004. #" << endl;
     cout << "#######################################################" << endl;
 
     // set byte enable (mask bytes)
@@ -222,7 +222,7 @@ void processor::program_main()
     // delay of the instruction processing time
     wait(ins_delay);
     // bus communication
-    if(!bus_readwrite(tlm::TLM_WRITE_COMMAND, 0x08000004, 4,  // cmd,addr,data_len
+    if(!bus_readwrite(tlm::TLM_WRITE_COMMAND, 0xFF000004, 4,  // cmd,addr,data_len
                       reinterpret_cast<uint8_t *>(&data),    // data_ptr[]
                       reinterpret_cast<uint8_t *>(&byte_en)) // byte_en_ptr[]
        ){

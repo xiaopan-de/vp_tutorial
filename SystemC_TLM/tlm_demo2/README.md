@@ -368,13 +368,117 @@ Once the payload fields are set up, `b_transport` is called to transport the pay
 A simple non-zero return code on error. 
 ```C 
    return  trans.is_response_ok () ? 0 : -1;
+}
 ```
 
-#### 4.2.5   Thread
+#### 4.2.5 Process Thread
+6 tests are conducted in the main process thread. 
 
+**Test 1-3 Read access **
+- Test_1: Read one byte data (char) from address 0xFF000000. 
+- Test_2: Read half-word data (short) from address 0xFF000000.
+- Test_3: Read full-word data (int) from address 0xFF000004.
 
+Before the  execution of the each test, the `wait` is called  to simulate the time consumed by instructions exection. 
+```C
+wait(ins_delay);
+```
+For the first test, the byte data `a` of the test sturct is stored in the firt byte at the memory address 0xFF000000. Therefore the byte enable mask is set to 0x000000FF, that means the last byte masked with `FF` is the insterested byte.  similar setups can be made to the test 2 and 3. 
 
+```C
+byte_en_t1 = 0x000000FF; addr_t1 = 0x00000000; 
+byte_en_t2 = 0xFFFF0000; addr_t2 = 0x00000000;
+byte_en_t3 = 0xFFFFFFFF; addr_t3 = 0x00000004;
+```
 
+Then call member function to generate transaction and print out the debug information. 
+
+```C
+if(!bus_readwrite(tlm::TLM_READ_COMMAND, 0xFF000000, 4,     // cmd,addr,data_len
+                  reinterpret_cast<uint8_t *>(&data),       // data_ptr[]
+                  reinterpret_cast<uint8_t *>(&byte_en))    // byte_en_ptr[]
+  ){
+        cout << "(Processor) @ " << sc_time_stamp();
+        cout << ", Read succeeded. " << endl;
+        cout << "    Readout data : 0x" << setw(4) << setfill('0');
+        cout << hex << uppercase << (data >> 16) << endl; //
+        cout << endl;
+    }else{
+        cout << "(Processor) @ " << sc_time_stamp();
+        cout << ", Read failed. " << endl;
+    }
+              
+```
+
+Test 1 to 3 prints the following result on the screen :
+
+```
+#######################################################
+# Test_1: Read one byte data from address 0xFF000000. #
+#######################################################
+(Memory)    @ 10 ns, Logging 
+    Command : READ
+    Address : 0xFF000000
+    Byte_en : 0x000000FF
+
+(Processor) @ 15 ns, Read succeeded. 
+    Readout data : 0xA0
+
+#######################################################
+# Test_2: Read half-word data from address 0xFF000000.#
+#######################################################
+(Memory)    @ 25 ns, Logging 
+    Command : READ
+    Address : 0xFF000000
+    Byte_en : 0xFFFF0000
+
+(Processor) @ 30 ns, Read succeeded. 
+    Readout data : 0xB1B0
+
+#######################################################
+# Test_3: Read full-word data from address 0xFF000004.#
+#######################################################
+(Memory)    @ 40 ns, Logging 
+    Command : READ
+    Address : 0xFF000004
+    Byte_en : 0xFFFFFFFF
+
+(Processor) @ 45 ns, Read succeeded. 
+    Readout data : 0xC3C2C1C0
+```
+
+The memory module logs the expected information from the transaction. And the processor retrieves the correct values from the memory. The time annotation is also as expected that 10ns for the instructions delay and 5ns for the transmission delay. 
+
+**Test 4-6 Write access **
+- Test_4: Write one byte data 0x0A (char) to address 0xFF000008.
+- Test_5: Write half-word data 0x1B0B (short) to address 0xFF000000.
+- Test_6: Write half-word data 0x3C2C1C0C (int)  to address 0xFF000004.
+
+Again, before the  execution of the each test, the `wait` is called  to simulate the time consumed by instructions exection. 
+```C
+wait(ins_delay);
+```
+For the first test, the byte data `a` of the test sturct is stored in the firt byte at the memory address 0xFF000000. Therefore the byte enable mask is set to 0x000000FF, that means the last byte masked with `FF` is the insterested byte.  similar setups can be made to the test 2 and 3. 
+
+```C
+byte_en_t4 = 0x000000FF; addr_t1 = 0x00000008; data_t4 = 0x0A; 
+byte_en_t5 = 0xFFFF0000; addr_t2 = 0x00000000; data_t5 = 0x1B0B; 
+byte_en_t6 = 0xFFFFFFFF; addr_t3 = 0x00000004; data_t6 = 0x3C2C1C0C; 
+```
+
+The information printed from the exection is the similar as test 1-3. The final memory content after all test executed is then: 
+```
+(Memory) @ 85 ns, updated
+ +----+----+----+----+ 
+ | 50 | 78 | 6D | 0A | 0x00000008
+ +----+----+----+----+ 
+ | 3C | 2C | 1C | 0C | 0x00000004
+ +----+----+----+----+ 
+ | B1 | B0 | 1B | 0B | 0x00000000
+ +----+----+----+----+ 
+```
+
+Think about what is the data struct of this layout in C/C++? 
 
 
 --- 
