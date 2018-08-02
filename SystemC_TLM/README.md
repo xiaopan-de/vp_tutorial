@@ -2,11 +2,11 @@
 This folder contains demo source files for the SytemC-TLM Demos: 
 
 ## 1. tlm_demo1 
-The first example demonstrates the basics of TLM blocking transport with the generic payload and simple sockets.  The following contents are covered in this example:
+The first example demonstrates the basics of TLM blocking transport with the generic payload and simple sockets. The following contents are covered in this example:
 - Create SystemC-TLM modules 
 - Use of TLM convenience simple initiator/target sockets
-- Binding with blocking transport interface
-- Setting and retrieving  attributes from the transaction
+- Bind blocking transport interface
+- Set and retrieve  attributes from the transaction
 - Untimed coding style 
 
 ## 2. tlm_demo2

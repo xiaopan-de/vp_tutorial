@@ -1,15 +1,16 @@
 #  TLM DEMO 1: Blocking Transport
-The first demo shows a basic example of blocking transport. The following contents are covered in this example:
-- Creating SystemC-TLM modules 
+The first example demonstrates the basics of TLM blocking transport with the generic payload and simple sockets. The following contents are covered in this example:
+- Create SystemC-TLM modules 
 - Use of TLM convenience simple initiator/target sockets
-- Binding with blocking transport interface
-- Setting and retrieving  attributes from the transaction
-- Untimed model
+- Bind blocking transport interface
+- Set and retrieve  attributes from the transaction
+- Untimed coding style 
 
-Figure_1  shows the simulation setup of TLM demo1. It consists of two modules, an *initiator*  and a *target*. The *initiator* module initiates the transactions that randomly READ/WRITE from/to the *target* module through an initiator socket.  And the *target* module prints the received incoming transactions. The transaction call is passed in between initiators and targets using *tlm_generic_payload*. This example uses the loosely-timed coding style that the transaction is sent through the socket using the *b_transport* method.
+
+Figure_1  shows the simulation setup of TLM_demo1. It consists  an *initiator* module and a *target* module. The *initiator* module initiates the transactions that randomly READ/WRITE from/to the *target* module through an initiator socket.  And the *target* module prints the received incoming transactions on the screen. The transaction call is passed in between initiators and targets via *tlm_generic_payload*. This example uses the untimed coding style (timeless loosely-timed coding style) that the transaction is sent through the socket using the blocking transport interface.
 
 ![](https://vul2cw.dm.files.1drv.com/y4mrxakQ9vvkc3KzfnchRIeV34eFwoGExB-ksmdaQPyUjc-uBQhbc8bDlStPvKabGDFsiGdIXOxjv45NKqnazQQ0mqBy-Ck5kNLepJtFKjEW0aH-UjGbqKtYYdVVvugRN_EcQec7hkL1Q-VTSqikM3-01tHbIHN8g8c3tWLltM9a3xLDs9sRi-NyYyELXyggt43mci_hhGCD2cWI7eIeMqviw?width=602&height=122&cropmode=none) 
-*Figure_1. Simulation Setup of TLM_Demo1* 
+*Figure_1. Simulation setup of TLM_Demo1* 
 
 --- 
 
@@ -19,7 +20,7 @@ The source code of the *initiator* module can be found in the folder `vp_tourial
 
 
 ### 1.1 Include Files
-The *initiator* module is based on the TLM 2.0 convenience simple initiator socket, so needs the appropriate header, in addition to the standard TLM 2.0 header from the utilities directory. Including `<iostream>` in the header to use functions such as `setw()` to format print
+The *initiator* module is based on the TLM 2.0 convenience simple initiator socket.  It needs the appropriate header, in addition to the standard TLM 2.0 header from the utilities directory. Including `<iostream>` in the header to use functions such as `setw()` to format print. 
 
 ```C
 #include <iomanip>
